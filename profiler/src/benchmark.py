@@ -15,6 +15,7 @@ import flamegraph
 import pandas
 import seaborn
 import matplotlib
+import hashlib
 
 
 def make_datasets(taxa_count, length, ds_count):
@@ -23,6 +24,11 @@ def make_datasets(taxa_count, length, ds_count):
         for prefix in util.base58_generator(ds_count)
     ]
 
+def compute_hash_with_path(path):
+    with open(path, 'rb') as program_file:
+        m = hashlib.sha256()
+        m.update(program_file.read())
+        return m.hexdigest()
 
 def run(prefix, regions, taxa, iters, procs, program_path, profile,
         flamegraph_cmd):
@@ -62,6 +68,7 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
                         'iters': iters,
                         'procs': procs,
                         'program_path': program_path,
+                        'program_sha256': compute_hash_with_path(program_path),
                         'profile': profile,
                     },
                     explicit_start=True,
