@@ -16,6 +16,7 @@ import pandas
 import seaborn
 import matplotlib
 import hashlib
+import datetime
 
 
 def make_datasets(taxa_count, length, ds_count):
@@ -74,6 +75,10 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
                     explicit_start=True,
                     explicit_end=True))
 
+        with open(os.path.join(prefix, 'notes.md'), 'w') as notesfile:
+            notesfile.write("- Started on: {}\n".format(
+                    datetime.datetime.now().isoformat()))
+
         for r, t in itertools.product(regions, taxa):
             exp_path = os.path.join(prefix,
                                     exp_name_format.format(regions=r, taxa=t))
@@ -124,3 +129,7 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
                     progress_bar.update(fg_task, advance=1.0)
 
             progress_bar.update(overall_task, advance=1.0)
+
+        with open(os.path.join(prefix, 'notes.md'), 'a') as notesfile:
+            notesfile.write("- Finshed on: {}\n".format(
+                    datetime.datetime.now().isoformat()))
