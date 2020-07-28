@@ -61,6 +61,12 @@ if __name__ == "__main__":
             rich.print("[red bold]Error, the progrma hash does not match the program" +
                        "that started this run[/red bold]")
             sys.exit(1)
+    else:
+        if not args.prefix is None and os.path.exists(args.prefix):
+            rich.print("[red bold]Refusing to resume an existing prefix "+
+                    "without the [white bold]--resume[/white bold] " +
+                    "flag[/red bold]")
+            sys.exit(1)
 
     if args.profile and args.program is None:
         args.program = DEFAULT_PROGRAM_PROFILE
