@@ -53,7 +53,7 @@ if __name__ == "__main__":
         args.taxa = parameters['taxa']
         args.iters = parameters['iters']
         args.procs = parameters['procs']
-        args.program_path = parameters['program_path']
+        args.program = parameters['program_path']
         parameters['program_sha256']
         args.profile = parameters['profile']
         if not parameters['program_sha256'] ==\
