@@ -31,6 +31,11 @@ def compute_hash_with_path(path):
         m.update(program_file.read())
         return m.hexdigest()
 
+def load_parameters(prefix):
+    paramters_filename = os.path.join(prefix, 'parameters.yaml')
+    with open(paramters_filename) as yamlfile:
+        return yaml.load(yamlfile.read())
+
 def run(prefix, regions, taxa, iters, procs, program_path, profile,
         flamegraph_cmd):
     os.makedirs(prefix, exist_ok=True)

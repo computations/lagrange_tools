@@ -8,6 +8,7 @@ import datetime
 import util
 import rich
 
+
 def git_describe(repo):
     description = repo.head.commit.hexsha[0:7]
     for t in repo.tags:
@@ -15,6 +16,7 @@ def git_describe(repo):
             description = t.name
             break
     return description
+
 
 if __name__ == "__main__":
 
@@ -37,7 +39,26 @@ if __name__ == "__main__":
     parser.add_argument("--procs", type=int)
     parser.add_argument("--program", type=str)
     parser.add_argument("--profile", action='store_true', default=False)
+    parser.add_argument("--resume", action='store_true', default=False)
     args = parser.parse_args()
+
+    if args.resume:
+        if args.prefix is None:
+            rich.print(
+                "Please specify which run to resume with the --prefix flag")
+            sys.exit(1)
+        parameters = benchmark.load_parameters(args.prefix)
+        args.regions = parameters['regions']
+        args.taxa = parameters['taxa']
+        args.iters = parameters['iters']
+        args.procs = parameters['procs']
+        args.program_path = parameters['program_path']
+        parameters['program_sha256']
+        args.profile = parameters['profile']
+        if not parameters['program_sha256'] ==\
+                benchmark.compute_hash_with_path(parameters['program_path']):
+            rich.print("Error, the progrma hash does not match the program" +
+                       "that started this run")
 
     if args.profile and args.program is None:
         args.program = DEFAULT_PROGRAM_PROFILE
@@ -56,8 +77,8 @@ if __name__ == "__main__":
         else:
             args.prefix = os.path.abspath(
                 os.path.join(SOURCE_DIR, '../timings', commit_string))
-        rich.print("Placing results in [red bold]{}[/red bold]".
-                format(os.path.relpath(args.prefix)))
+        rich.print("Placing results in [red bold]{}[/red bold]".format(
+            os.path.relpath(args.prefix)))
 
     benchmark.run(args.prefix, args.regions, args.taxa, args.iters, args.procs,
                   args.program, args.profile, flamegraph_cmd)

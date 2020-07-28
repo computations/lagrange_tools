@@ -78,19 +78,28 @@ states
         taxa_count  -- Number of taxa to generate
         """
         super().__init__(path, **kwargs)
-        self._file_prefix = self._file_prefix + "_" + util.make_random_nonce()
-        self._tree = ete3.Tree()
-        self._length = kwargs['length']
-        self._tree.populate(
-            kwargs['taxa_count'],
-            names_library=[
-                s for s in util.base26_generator(kwargs['taxa_count'])
-            ])
-        self._alignment = lagrange_dataset.generate_alignment(
-            self.taxa_set, kwargs['length'])
-        self._area_names = [
-            "R" + str.upper(s) for s in util.base26_generator(self.length)
-        ]
+        if os.path.exists(self.path):
+            self._existing = True
+            files = os.listdir(self.path)
+            for f in files:
+                if os.path.splitext(f)[1] == ".conf":
+                    self._file_prefix = f.os.path.splitext(f)[0]
+                    break
+        else:
+            self._file_prefix = self._file_prefix + "_" + util.make_random_nonce()
+            self._tree = ete3.Tree()
+            self._length = kwargs['length']
+            self._tree.populate(
+                kwargs['taxa_count'],
+                names_library=[
+                    s for s in util.base26_generator(kwargs['taxa_count'])
+                ])
+            self._alignment = lagrange_dataset.generate_alignment(
+                self.taxa_set, kwargs['length'])
+            self._area_names = [
+                "R" + str.upper(s) for s in util.base26_generator(self.length)
+            ]
+            self._existing = False
 
     def make_lagrange_file(self):
         return self._lagrange_config.format(
@@ -100,10 +109,11 @@ states
         )
 
     def write(self):
-        self._make_path()
-        self._write_lagrange_conf()
-        self._write_treefile()
-        self._write_alignmentfile()
+        if not self._existing:
+            self._make_path()
+            self._write_lagrange_conf()
+            self._write_treefile()
+            self._write_alignmentfile()
 
     def _write_alignmentfile(self):
         with open(self.alignment_path, 'w') as outfile:

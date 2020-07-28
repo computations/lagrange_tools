@@ -37,8 +37,8 @@ class program:
     def check_done(self, path):
         return os.path.exists(program._donefile(path))
 
-class lagrange(program):
 
+class lagrange(program):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -67,7 +67,11 @@ class lagrange_result(result.result):
         with open(self.logfile_path) as logfile:
             time_line = list(logfile)[-1]
 
-        self._time = lagrange_result._parse_timeline(time_line)
+        try:
+            self._time = lagrange_result._parse_timeline(time_line)
+        except:
+            raise RuntimeError("Could not parse the time line for file: " +
+                               self.logfile_path)
 
     @property
     def logfile_path(self):
