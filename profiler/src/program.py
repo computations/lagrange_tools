@@ -4,6 +4,7 @@ import subprocess
 import os
 import util
 import result
+import datetime
 
 
 class program:
@@ -24,6 +25,17 @@ class program:
             return "perf record -g".split()
         return []
 
+    @staticmethod
+    def _donefile(path):
+        return os.path.join(path, ".done")
+
+    def set_done(self, path):
+        with open(program._donefile(path), 'w') as donefile:
+            donefile.write(str(datetime.datetime.now()))
+            donefile.write("\n")
+
+    def check_done(self, path):
+        return os.path.exists(program._donefile(path))
 
 class lagrange(program):
 
@@ -31,12 +43,15 @@ class lagrange(program):
         super().__init__(**kwargs)
 
     def run(self, dataset):
+        if self.check_done(dataset.path):
+            return None
         with util.directory_guard(dataset.path):
             with open('lagrange.log', 'w') as logfile:
                 cmd = []
                 cmd.extend(self.profile_cmd)
                 cmd.extend([self.binary, dataset.lagrange_config_path])
                 subprocess.run(cmd, stdout=logfile, stderr=logfile)
+                self.set_done(dataset.path)
 
     def get_result(self, dataset):
         return lagrange_result(dataset)

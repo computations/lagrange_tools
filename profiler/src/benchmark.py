@@ -33,10 +33,7 @@ def compute_hash_with_path(path):
 
 def run(prefix, regions, taxa, iters, procs, program_path, profile,
         flamegraph_cmd):
-    if os.path.exists(prefix):
-        print("Prefix already exists")
-        sys.exit(1)
-    os.makedirs(prefix)
+    os.makedirs(prefix, exist_ok=True)
 
     exp_program = [
         program.lagrange(binary_path=os.path.abspath(program_path),
