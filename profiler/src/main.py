@@ -7,6 +7,7 @@ import os
 import datetime
 import util
 import rich
+import sys
 
 
 def git_describe(repo):
@@ -57,8 +58,9 @@ if __name__ == "__main__":
         args.profile = parameters['profile']
         if not parameters['program_sha256'] ==\
                 benchmark.compute_hash_with_path(parameters['program_path']):
-            rich.print("Error, the progrma hash does not match the program" +
-                       "that started this run")
+            rich.print("[red bold]Error, the progrma hash does not match the program" +
+                       "that started this run[/red bold]")
+            sys.exit(1)
 
     if args.profile and args.program is None:
         args.program = DEFAULT_PROGRAM_PROFILE
