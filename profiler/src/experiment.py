@@ -43,20 +43,15 @@ class experiment:
         return self._datasets
 
     @staticmethod
-    def _internal_run(ds, prog, progress_bar, task):
-        progress_bar.update(task, advance=1.0)
+    def _internal_run(ds, prog):
         ds.write()
         prog.run(ds)
 
-    def run(self, progress_bar, procs=None):
-        task = progress_bar.add_task('Running {}...'.format(
-            os.path.split(self._root_path)[-1]), total = len(self._datasets) *
-            len(self._programs))
-        jobs = [(ds, prog, progress_bar, task) for ds in self._datasets
-                for prog in self._programs]
+    def run(self, procs=None):
+        jobs = [(ds, prog) for ds in self._datasets for prog in self._programs]
         if procs is None:
             procs = 1
-        with multiprocessing.pool.ThreadPool(procs) as pool:
+        with multiprocessing.pool.Pool(procs) as pool:
             pool.starmap(experiment._internal_run, jobs)
 
     def collect_results(self):

@@ -53,11 +53,9 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
 
         total_datasets = len(regions) * len(taxa)
         total_work = total_datasets * iters
-        extra_work = 1
+        extra_work = 0
         if profile:
             extra_work += 1
-        overall_task = progress_bar.add_task("Overall...",
-                                             total=total_datasets + extra_work)
         make_task = progress_bar.add_task("Making datasets...",
                                           total=total_datasets)
 
@@ -89,10 +87,11 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
                                       exp_program))
             progress_bar.update(make_task, advance=1.0)
 
-        progress_bar.update(overall_task, advance=1.0)
+        overall_task = progress_bar.add_task("Running...",
+                                             total=total_datasets + extra_work)
 
         for e in exp:
-            e.run(progress_bar, procs)
+            e.run(procs)
             progress_bar.update(overall_task, advance=1.0)
 
         if not profile:
