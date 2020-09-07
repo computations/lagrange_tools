@@ -34,8 +34,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--prefix", type=str)
-    parser.add_argument("--regions", type=int, nargs="+", default=[4, 5])
-    parser.add_argument("--taxa", type=int, nargs="+", default=[10, 50])
+    parser.add_argument("--regions", type=int, nargs="+", default=[5, 6])
+    parser.add_argument("--taxa", type=int, nargs="+", default=[50, 100])
     parser.add_argument("--iters", type=int, default=100)
     parser.add_argument("--procs", type=int)
     parser.add_argument("--program", type=str)
