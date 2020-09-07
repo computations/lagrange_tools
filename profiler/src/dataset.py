@@ -94,6 +94,8 @@ states
                 names_library=[
                     s for s in util.base26_generator(kwargs['taxa_count'])
                 ])
+            for c in self._tree.traverse():
+                c.dist = numpy.random.exponential()
             self._alignment = lagrange_dataset.generate_alignment(
                 self.taxa_set, kwargs['length'])
             self._area_names = [
