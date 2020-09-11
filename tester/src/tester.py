@@ -9,6 +9,7 @@ import rich
 import rich.console
 import rich.progress
 import yaml
+from timeit import default_timer as timer
 
 
 def file_type(filename):
@@ -187,6 +188,7 @@ def print_current_trial(console, path):
 
 
 def run(prefix, archive, program):
+    start = timer()
     runner = lagrange.lagrange(program)
     failed_paths = []
 
@@ -232,3 +234,5 @@ def run(prefix, archive, program):
         console.print("Total of {} paths failed".format(len(failed_paths)))
     else:
         console.print("[bold green]All Clear!")
+    end = timer()
+    console.print("Testing took {} seconds".format(end-start))

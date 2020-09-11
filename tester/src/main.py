@@ -25,3 +25,4 @@ if __name__ == "__main__":
 
     args.program = os.path.abspath(args.program)
     tester.run(args.prefix, args.archive, args.program)
+
