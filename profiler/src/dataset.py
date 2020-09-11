@@ -95,7 +95,8 @@ states
                     s for s in util.base26_generator(kwargs['taxa_count'])
                 ])
             for c in self._tree.traverse():
-                c.dist = numpy.random.exponential()
+                c.dist = numpy.random.gamma(0.5)
+            self._make_ultrametric(self._tree)
             self._alignment = lagrange_dataset.generate_alignment(
                 self.taxa_set, kwargs['length'])
             self._area_names = [
@@ -133,6 +134,17 @@ states
     def _write_treefile(self):
         with open(self.tree_path, 'w') as outfile:
             outfile.write(self._tree.write(format=5))
+
+    @staticmethod
+    def _make_ultrametric(tree):
+        heights = [lagrange_dataset._make_ultrametric(c) for c in tree.children]
+        if len(heights) == 0:
+            return tree.dist
+        max_height = max(heights)
+        for c, h in zip(tree.children, heights):
+            dh = max_height - h
+            c.dist += dh
+        return max_height + tree.dist
 
     @property
     def lagrange_config_filename(self):
