@@ -235,4 +235,4 @@ def run(prefix, archive, program):
     else:
         console.print("[bold green]All Clear!")
     end = timer()
-    console.print("Testing took {} seconds".format(end-start))
+    console.print("Testing took {:.3} seconds".format(end-start))
