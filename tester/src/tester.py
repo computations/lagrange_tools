@@ -123,7 +123,7 @@ def get_lagrange_ext(filename):
 def order_bgkey_bgstates(files):
     if len(files) != 2:
         raise Exception(
-            "This function requires a list of two arguements, got {}".format(
+            "This function requires a list of two arguments, got {}".format(
                 len(files)))
     if get_lagrange_ext(files[0]) == '.bgkey':
         return (files[0], files[1])
