@@ -9,7 +9,14 @@ import rich
 import rich.console
 import rich.progress
 import yaml
+import enum
 from timeit import default_timer as timer
+
+
+class experiment_result_t(enum.Enum):
+    success = 0
+    run_failed = 1
+    results_differ = 2
 
 
 def file_type(filename):
@@ -160,11 +167,17 @@ def compare_results_expected(path):
     files = [
         f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))
     ]
-    expected_results = lagrange.lagrange_results(
-        *select_experiment(path, files))
-    experiment_results = lagrange.lagrange_results(
-        *select_expected(path, files))
-    return experiment_results == expected_results
+    try:
+        expected_results = lagrange.lagrange_results(
+            *select_experiment(path, files))
+        experiment_results = lagrange.lagrange_results(
+            *select_expected(path, files))
+    except:
+        return experiment_result_t.run_failed
+    if experiment_results == expected_results:
+        return experiment_result_t.success
+    else:
+        return experiment_result_t.results_differ
 
 
 def get_taxa_count(trial):
@@ -191,6 +204,7 @@ def run(prefix, archive, program):
     start = timer()
     runner = lagrange.lagrange(program)
     failed_paths = []
+    failed_runs = []
 
     console = rich.console.Console()
     with rich.progress.Progress() as progress:
@@ -225,14 +239,22 @@ def run(prefix, archive, program):
             for path, config_file in work_paths:
                 runner.run(path, config_file)
                 progress.update(test_task, advance=1.0)
-                if not compare_results_expected(path):
+                result = compare_results_expected(path)
+                if result == experiment_result_t.results_differ:
                     failed_paths.append(path)
+                elif result == experiment_result_t.run_failed:
+                    failed_runs.append(path)
+
     with open(os.path.join(prefix, "failed_paths.yaml"), "w") as outfile:
         outfile.write(yaml.dump(failed_paths))
     if len(failed_paths) != 0:
-        console.print("failed paths:", sorted(failed_paths))
+        console.print("Failed paths:", sorted(failed_paths))
         console.print("Total of {} paths failed".format(len(failed_paths)))
+    if len(failed_runs) != 0:
+        console.print("Failed runs:", sorted(failed_runs))
+        console.print("Total of {} paths failed to run".format(
+            len(failed_runs)))
     else:
         console.print("[bold green]All Clear!")
     end = timer()
-    console.print("Testing took {:.3f} seconds".format(end-start))
+    console.print("Testing took {:.3f} seconds".format(end - start))
