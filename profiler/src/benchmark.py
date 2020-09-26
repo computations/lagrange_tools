@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import dataset
+import plots
 import program
 import experiment
 import util
@@ -25,16 +26,19 @@ def make_datasets(taxa_count, length, ds_count):
         for prefix in util.base58_generator(ds_count)
     ]
 
+
 def compute_hash_with_path(path):
     with open(path, 'rb') as program_file:
         m = hashlib.sha256()
         m.update(program_file.read())
         return m.hexdigest()
 
+
 def load_parameters(prefix):
     paramters_filename = os.path.join(prefix, 'parameters.yaml')
     with open(paramters_filename) as yamlfile:
         return yaml.safe_load(yamlfile.read())
+
 
 def run(prefix, regions, taxa, iters, procs, program_path, profile,
         flamegraph_cmd):
@@ -77,7 +81,7 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
 
         with open(os.path.join(prefix, 'notes.md'), 'w') as notesfile:
             notesfile.write("- Started on: {}\n".format(
-                    datetime.datetime.now().isoformat()))
+                datetime.datetime.now().isoformat()))
 
         for r, t in itertools.product(regions, taxa):
             exp_path = os.path.join(prefix,
@@ -107,17 +111,7 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
                     writer.writerow(result.write_row())
 
             dataframe = pandas.read_csv(os.path.join(prefix, 'results.csv'))
-            seaborn.set_style("whitegrid")
-            plot = seaborn.FacetGrid(dataframe,
-                                     row="taxa",
-                                     col="regions",
-                                     height=7,
-                                     sharex=False,
-                                     margin_titles=True).map(seaborn.distplot,
-                                                             "time",
-                                                             hist=False,
-                                                             rug=True)
-            plot.savefig(os.path.join(prefix, 'times.png'))
+            plots.make_plots(dataframe, prefix)
 
         else:
             fg_work = len(exp) * len(exp[0].datasets)
@@ -133,4 +127,4 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
 
         with open(os.path.join(prefix, 'notes.md'), 'a') as notesfile:
             notesfile.write("- Finshed on: {}\n".format(
-                    datetime.datetime.now().isoformat()))
+                datetime.datetime.now().isoformat()))
