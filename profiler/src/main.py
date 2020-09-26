@@ -25,7 +25,7 @@ if __name__ == "__main__":
     DEFAULT_PROGRAM = os.path.abspath(
         os.path.join(SOURCE_DIR, "../../../bin/lagrange"))
     DEFAULT_PROGRAM_PROFILE = os.path.abspath(
-        os.path.join(SOURCE_DIR, "../../../bin/lagrange_profile"))
+        os.path.join(SOURCE_DIR, "../../../bin/lagrange-profile"))
 
     flamegraph_cmd = [
         "bash",
