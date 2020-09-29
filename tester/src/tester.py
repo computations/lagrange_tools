@@ -247,13 +247,15 @@ def run(prefix, archive, program):
 
     with open(os.path.join(prefix, "failed_paths.yaml"), "w") as outfile:
         outfile.write(yaml.dump(failed_paths))
-    if len(failed_paths) != 0:
-        console.print("Failed paths:", sorted(failed_paths))
-        console.print("Total of {} paths failed".format(len(failed_paths)))
-    if len(failed_runs) != 0:
-        console.print("Failed runs:", sorted(failed_runs))
-        console.print("Total of {} paths failed to run".format(
-            len(failed_runs)))
+    if len(failed_paths) != 0 or len(failed_runs) != 0:
+        if len(failed_paths) != 0:
+            console.print("Tests that completed, but gave a wrong result:",
+                          sorted(failed_paths))
+            console.print("Total of {} paths failed".format(len(failed_paths)))
+        if len(failed_runs) != 0:
+            console.print("Tests that failed to complete:", sorted(failed_runs))
+            console.print("Total of {} paths failed to run".format(
+                len(failed_runs)))
     else:
         console.print("[bold green]All Clear!")
     end = timer()
