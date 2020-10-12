@@ -10,6 +10,7 @@ import rich.console
 import rich.progress
 import yaml
 import enum
+import shutil
 from timeit import default_timer as timer
 
 
@@ -200,7 +201,7 @@ def print_current_trial(console, path):
                   get_region_count(trial), "regions", "iteration", iteration)
 
 
-def run(prefix, archive, program):
+def run(prefix, archive, program, prefix_specified):
     start = timer()
     runner = lagrange.lagrange(program)
     failed_paths = []
@@ -253,9 +254,17 @@ def run(prefix, archive, program):
                           sorted(failed_paths))
             console.print("Total of {} paths failed".format(len(failed_paths)))
         if len(failed_runs) != 0:
-            console.print("Tests that failed to complete:", sorted(failed_runs))
+            console.print("Tests that failed to complete:",
+                          sorted(failed_runs))
             console.print("Total of {} paths failed to run".format(
                 len(failed_runs)))
+        if not prefix_specified:
+            basename = os.path.split(prefix)[1]
+            new_prefix = os.path.abspath(os.path.join(os.getcwd(), basename))
+            console.print(
+                "Copying the failed directories to {}".format(new_prefix))
+            shutil.copytree(prefix, new_prefix)
+
     else:
         console.print("[bold green]All Clear!")
     end = timer()

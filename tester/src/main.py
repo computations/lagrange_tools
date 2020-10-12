@@ -18,10 +18,12 @@ if __name__ == "__main__":
     parser.add_argument('--program', type=str, default=DEFAULT_PROGRAM)
     args = parser.parse_args()
 
+    prefix_specified = True
     if args.prefix is None:
+        prefix_specified = False
         tempdir = tempfile.TemporaryDirectory()
         print("Using the tempdir:", tempdir.name)
         args.prefix = tempdir.name
 
     args.program = os.path.abspath(args.program)
-    tester.run(args.prefix, args.archive, args.program)
+    tester.run(args.prefix, args.archive, args.program, prefix_specified)
