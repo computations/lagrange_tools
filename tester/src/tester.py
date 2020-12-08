@@ -36,6 +36,8 @@ def file_type(filename):
         return 'phylip'
     if extension == '.conf':
         return 'config'
+    if extension == '.json':
+        return 'json'
     return 'unknown'
 
 
@@ -128,6 +130,10 @@ def get_lagrange_ext(filename):
     return os.path.splitext(os.path.splitext(filename)[0])[1]
 
 
+def get_base_ext(filename):
+    return os.path.splitext(filename)[1]
+
+
 def order_bgkey_bgstates(files):
     if len(files) != 2:
         raise Exception(
@@ -141,8 +147,8 @@ def order_bgkey_bgstates(files):
 def select_bgkey_bgstates(files):
     ret = []
     for f in files:
-        if get_lagrange_ext(f) == '.bgkey' or get_lagrange_ext(
-                f) == '.bgstates':
+        if (get_lagrange_ext(f) == '.bgkey' and get_base_ext(f) == '.tre') or \
+            (get_lagrange_ext(f) == '.bgstates' and get_base_ext(f) == '.tre'):
             ret.append(f)
     return ret
 
@@ -201,7 +207,7 @@ def print_current_trial(console, path):
                   get_region_count(trial), "regions", "iteration", iteration)
 
 
-def run(prefix, archive, program, prefix_specified):
+def run(prefix, archive, program, prefix_specified, fail_threshold):
     start = timer()
     runner = lagrange.lagrange(program)
     failed_paths = []
@@ -258,7 +264,8 @@ def run(prefix, archive, program, prefix_specified):
                           sorted(failed_runs))
             console.print("Total of {} paths failed to run".format(
                 len(failed_runs)))
-        if not prefix_specified:
+        if not prefix_specified and (len(failed_paths) > fail_threshold
+                                     or len(failed_runs) != 0):
             basename = os.path.split(prefix)[1]
             new_prefix = os.path.abspath(os.path.join(os.getcwd(), basename))
             console.print(

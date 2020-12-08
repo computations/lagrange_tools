@@ -16,6 +16,7 @@ if __name__ == "__main__":
     parser.add_argument('--prefix', type=str)
     parser.add_argument('--archive', type=str, default=DEFAULT_ARCHIVE)
     parser.add_argument('--program', type=str, default=DEFAULT_PROGRAM)
+    parser.add_argument('--fail-threshold', type=int, default=10)
     args = parser.parse_args()
 
     prefix_specified = True
@@ -26,4 +27,5 @@ if __name__ == "__main__":
         args.prefix = tempdir.name
 
     args.program = os.path.abspath(args.program)
-    tester.run(args.prefix, args.archive, args.program, prefix_specified)
+    tester.run(args.prefix, args.archive, args.program, prefix_specified,
+            args.fail_threshold)
