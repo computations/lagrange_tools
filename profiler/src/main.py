@@ -8,6 +8,7 @@ import datetime
 import util
 import rich
 import sys
+from timeit import default_timer as timer
 
 
 def git_describe(repo):
@@ -58,14 +59,15 @@ if __name__ == "__main__":
         args.profile = parameters['profile']
         if not parameters['program_sha256'] ==\
                 benchmark.compute_hash_with_path(parameters['program_path']):
-            rich.print("[red bold]Error, the progrma hash does not match the program" +
-                       "that started this run[/red bold]")
+            rich.print(
+                "[red bold]Error, the progrma hash does not match the program"
+                + "that started this run[/red bold]")
             sys.exit(1)
     else:
         if not args.prefix is None and os.path.exists(args.prefix):
-            rich.print("[red bold]Refusing to resume an existing prefix "+
-                    "without the [white bold]--resume[/white bold] " +
-                    "flag[/red bold]")
+            rich.print("[red bold]Refusing to resume an existing prefix " +
+                       "without the [white bold]--resume[/white bold] " +
+                       "flag[/red bold]")
             sys.exit(1)
 
     if args.profile and args.program is None:
@@ -88,5 +90,8 @@ if __name__ == "__main__":
         rich.print("Placing results in [red bold]{}[/red bold]".format(
             os.path.relpath(args.prefix)))
 
+    start_time = timer()
     benchmark.run(args.prefix, args.regions, args.taxa, args.iters, args.procs,
                   args.program, args.profile, flamegraph_cmd)
+    end_time = timer()
+    rich.print("Benchmarks took {:.3f} seconds".format(end_time - start_time))
