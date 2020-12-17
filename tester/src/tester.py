@@ -5,6 +5,7 @@ import argparse
 import pathlib
 import util
 import lagrange
+import directory
 import rich
 import rich.console
 import rich.progress
@@ -14,204 +15,77 @@ import shutil
 from timeit import default_timer as timer
 
 
-class experiment_result_t(enum.Enum):
-    success = 0
-    run_failed = 1
-    results_differ = 2
-
-
-def file_type(filename):
-    basename, extension = os.path.splitext(filename)
-    if extension == '.log':
-        return "log"
-    if extension == '.tre':
-        subbasename, subextension = os.path.splitext(basename)
-        if subextension == '.bgkey':
-            return 'bgkey'
-        if subextension == '.bgstates':
-            return 'bgstates'
-    if extension == '.nwk':
-        return 'newick'
-    if extension == '.phy':
-        return 'phylip'
-    if extension == '.conf':
-        return 'config'
-    if extension == '.json':
-        return 'json'
-    return 'unknown'
-
-
-def replace_prefix_list(path, prefix):
-    tmp_path = pathlib.Path(prefix[0])
-    for i in range(1, len(path.parts)):
-        if i < len(prefix):
-            tmp_path /= prefix[i]
-        else:
-            tmp_path /= path.parts[i]
-    return tmp_path
-
-
-def replace_prefix_string(path, prefix):
-    tmp_path = pathlib.Path(prefix)
-    for i in range(1, len(path.parts)):
-        tmp_path /= path.parts[i]
-    return tmp_path
-
-
-def replace_prefix(path, prefix):
-    if type(prefix) is list:
-        return replace_prefix_list(path, prefix)
-    if type(prefix) is str:
-        return replace_prefix_string(path, prefix)
-
-
-def replace_basename(path, basename):
-    tmp_path = pathlib.Path(path.parts[0])
-    for part in path.parts[1:-1]:
-        tmp_path /= part
-    tmp_path /= basename
-    return tmp_path
-
-
-def extract_name_without_nonce(basename):
-    prefix_with_nonce = basename.split('.')[0]
-    prefix = '_'.join(prefix_with_nonce.split('_')[0:-1])
-    for ext in basename.split('.')[1:]:
-        prefix += '.'
-        prefix += ext
-    return prefix
-
-
-def extract(tar, member, member_path, prefix):
-    os.makedirs(member_path.parent, exist_ok=True)
-    with member_path.open('wb') as outfile:
-        outfile.write(tar.extractfile(member).read())
-
-
-def extract_with_path(tar, member, prefix):
-    member_path = pathlib.Path(member.name)
-    member_path = replace_prefix(member_path, prefix)
-    extract(tar, member, member_path, prefix)
-
-
-def extract_with_clean_name(tar, member, prefix):
-    member_path = pathlib.Path(member.name)
-    member_path = replace_prefix(member_path, prefix)
-    basename = member_path.name
-    basename = extract_name_without_nonce(basename)
-    member_path = replace_basename(member_path, basename)
-    extract(tar, member, member_path, prefix)
-
-
-def extract_with_set_name(tar, member, name, prefix):
-    member_path = pathlib.Path(member.name)
-    member_path = replace_prefix(member_path, prefix)
-    basename = '.'.join([name] + member_path.name.split('.')[1:])
-    member_path = replace_basename(member_path, basename)
-    extract(tar, member, member_path, prefix)
-
-
-def find_config_file(files):
-    for f in files:
-        if file_type(f) == 'config':
-            return f
-    return None
-
-
-def select_files_with_prefix(prefix, files):
-    ret = []
-    for f in files:
-        if f[:len(prefix)] == prefix:
-            ret.append(f)
-    return ret
-
-
-def get_lagrange_ext(filename):
-    return os.path.splitext(os.path.splitext(filename)[0])[1]
-
-
-def get_base_ext(filename):
-    return os.path.splitext(filename)[1]
-
-
-def order_bgkey_bgstates(files):
-    if len(files) != 2:
-        raise Exception(
-            "This function requires a list of two arguments, got {}".format(
-                len(files)))
-    if get_lagrange_ext(files[0]) == '.bgkey':
-        return (files[0], files[1])
-    return (files[1], files[0])
-
-
-def select_bgkey_bgstates(files):
-    ret = []
-    for f in files:
-        if (get_lagrange_ext(f) == '.bgkey' and get_base_ext(f) == '.tre') or \
-            (get_lagrange_ext(f) == '.bgstates' and get_base_ext(f) == '.tre'):
-            ret.append(f)
-    return ret
-
-
-def select_expected(path, files):
-    bgkey, bgstates = order_bgkey_bgstates(
-        select_bgkey_bgstates(select_files_with_prefix('expected', files)))
-    return (os.path.join(path, bgkey), os.path.join(path, bgstates))
-
-
-def select_experiment(path, files):
-    try:
-        bgkey, bgstates = order_bgkey_bgstates(
-            select_bgkey_bgstates(
-                select_files_with_prefix('lagrange_exp', files)))
-    except:
-        raise Exception("Failed to find the experiment files in: '{}'".format(
-            ','.join(files)))
-    return (os.path.join(path, bgkey), os.path.join(path, bgstates))
-
-
-def compare_results_expected(path):
-    files = [
-        f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))
-    ]
-    try:
-        expected_results = lagrange.lagrange_results(
-            *select_experiment(path, files))
-        experiment_results = lagrange.lagrange_results(
-            *select_expected(path, files))
-    except:
-        return experiment_result_t.run_failed
-    if experiment_results == expected_results:
-        return experiment_result_t.success
-    else:
-        return experiment_result_t.results_differ
-
-
-def get_taxa_count(trial):
-    taxa, _ = trial.split('_')
-    taxa_count = taxa.strip('taxa')
-    return int(taxa_count)
-
-
-def get_region_count(trial):
-    _, region = trial.split('_')
-    region_count = region.strip('regions')
-    return int(region_count)
-
-
-def print_current_trial(console, path):
-    trial, iteration = os.path.split(path)
-    trial = os.path.relpath(trial)
-
-    console.print("Running trial:", get_taxa_count(trial), "taxa",
-                  get_region_count(trial), "regions", "iteration", iteration)
-
-
-def run(prefix, archive, program, prefix_specified, fail_threshold):
+def run(prefix, archive, program, prefix_specified, copy_threshold,
+        distance_threshold):
     start = timer()
-    runner = lagrange.lagrange(program)
-    failed_paths = []
     failed_runs = []
+    error_runs = []
+    lagrange_runner = lagrange.lagrange(program)
+
+    console = rich.console.Console()
+    with rich.progress.Progress() as progress:
+        jobs = directory.extractTarFileAndMakeDirectories(
+            archive, prefix, progress)
+
+        work_task = progress.add_task("[red]Running...", total=len(jobs))
+        for expected, experiment in jobs:
+            try:
+                experiment.runExperiment(lagrange_runner)
+            except directory.ExperimentFilesMissing:
+                error_runs.append(experiment)
+            progress.update(work_task, advance=1.0)
+
+        check_task = progress.add_task("[red]Checking...", total=len(jobs))
+
+        for expected, experiment in jobs:
+            if experiment.failed():
+                continue
+            dist = expected.metricCompare(experiment)
+            if dist > distance_threshold:
+                failed_runs.append(
+                    directory.ExperimentWithDistance(experiment, dist))
+            progress.update(check_task, advance=1.0)
+
+    with open(os.path.join(prefix, "failed_paths.yaml"), "w") as outfile:
+        yaml.add_representer(directory.ExpectedTrialDirectory,
+                             directory.DirectoryRepresenter)
+        yaml.add_representer(directory.ExperimentTrialDirectory,
+                             directory.DirectoryRepresenter)
+        yaml.add_representer(directory.ExperimentWithDistance,
+                             directory.ExperimentWithDistanceRepresenter)
+        outfile.write(
+            yaml.dump({
+                "failed-runs": failed_runs,
+                "error-runs": error_runs
+            }))
+
+    if len(failed_runs) != 0 or len(error_runs) != 0:
+        if len(failed_runs) != 0:
+            console.print("Tests that completed, but gave a wrong result:",
+                          sorted(failed_runs, key=lambda a: a._dist))
+            console.print("Total of {} paths failed".format(len(failed_runs)))
+        if len(error_runs) != 0:
+            console.print("Tests that failed to complete:",
+                          sorted(error_runs, key=lambda d: d._path))
+            console.print("Total of {} paths failed to run".format(
+                len(error_runs)))
+        if not prefix_specified and (len(failed_runs) > fail_threshold
+                                     or len(error_runs) != 0):
+            basename = os.path.split(prefix)[1]
+            new_prefix = os.path.abspath(os.path.join(os.getcwd(), basename))
+            console.print(
+                "Copying the failed directories to {}".format(new_prefix))
+            shutil.copytree(prefix, new_prefix)
+
+    else:
+        console.print("[bold green]All Clear!")
+    end = timer()
+    console.print("Testing took {:.3f} seconds".format(end - start))
+
+
+"""
+def run(prefix, archive, program, prefix_specified, fail_threshold):
+    runner = lagrange.lagrange(program)
 
     console = rich.console.Console()
     with rich.progress.Progress() as progress:
@@ -276,3 +150,4 @@ def run(prefix, archive, program, prefix_specified, fail_threshold):
         console.print("[bold green]All Clear!")
     end = timer()
     console.print("Testing took {:.3f} seconds".format(end - start))
+"""

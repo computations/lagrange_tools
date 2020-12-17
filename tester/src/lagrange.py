@@ -15,21 +15,3 @@ class lagrange:
                 subprocess.run([self._lagrange_path, config_file],
                                stdout=logfile,
                                stderr=logfile)
-
-
-class lagrange_results:
-    def __init__(self, bgkey, bgstates):
-        self._bgkey = bgkey
-        self._bgstates = bgstates
-
-    @property
-    def bgkey(self):
-        return self._bgkey
-
-    @property
-    def bgstates(self):
-        return self._bgstates
-
-    def __eq__(self, other):
-        return filecmp.cmp(self._bgkey, other._bgkey, shallow=False) and\
-                filecmp.cmp(self._bgstates, other._bgstates, shallow=False)

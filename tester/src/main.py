@@ -17,6 +17,7 @@ if __name__ == "__main__":
     parser.add_argument('--archive', type=str, default=DEFAULT_ARCHIVE)
     parser.add_argument('--program', type=str, default=DEFAULT_PROGRAM)
     parser.add_argument('--fail-threshold', type=int, default=10)
+    parser.add_argument('--distance-threshold', type=float, default=1e-6)
     args = parser.parse_args()
 
     prefix_specified = True
@@ -28,4 +29,4 @@ if __name__ == "__main__":
 
     args.program = os.path.abspath(args.program)
     tester.run(args.prefix, args.archive, args.program, prefix_specified,
-            args.fail_threshold)
+            args.fail_threshold, args.distance_threshold)
