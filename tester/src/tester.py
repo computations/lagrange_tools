@@ -69,7 +69,7 @@ def run(prefix, archive, program, prefix_specified, copy_threshold,
                           sorted(error_runs, key=lambda d: d._path))
             console.print("Total of {} paths failed to run".format(
                 len(error_runs)))
-        if not prefix_specified and (len(failed_runs) > fail_threshold
+        if not prefix_specified and (len(failed_runs) > copy_threshold
                                      or len(error_runs) != 0):
             basename = os.path.split(prefix)[1]
             new_prefix = os.path.abspath(os.path.join(os.getcwd(), basename))
