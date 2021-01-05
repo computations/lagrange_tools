@@ -108,6 +108,10 @@ class TrialDirectory:
     def metricCompare(self, other):
         return self._lagrange_log.wassersteinMetric(other._lagrange_log)
 
+    def parameterVectorDifference(self, other):
+        return numpy.abs(self._lagrange_log.paramsVector() -
+                         other._lagrange_log.paramsVector())
+
     def __repr__(self):
         sub_path, basename = os.path.split(self._path)
         if basename == 'experiment' or basename == 'expected':

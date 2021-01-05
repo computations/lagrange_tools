@@ -7,6 +7,7 @@ import graph
 
 NODE_RESULTS_KEY = 'node-results'
 ATTRIBUTES_KEY = 'attributes'
+PARAMS_KEY = 'params'
 
 
 class LagrangeLogFileType(enum.Enum):
@@ -35,6 +36,9 @@ class LagrangeLog:
 
     def wassersteinMetric(self, other):
         return self._json_log.normalizedWasserSteinMetric(other._json_log)
+
+    def paramsVector(self):
+        return self._json_log.params_vector()
 
 
 class LogFile:
@@ -83,6 +87,8 @@ class JSONLog(LogFile):
     def _setup_read_attributes(self):
         self._regions = self._log[ATTRIBUTES_KEY]['regions']
         self._taxa = self._log[ATTRIBUTES_KEY]['taxa']
+        self._dispersion_rate = self._log[PARAMS_KEY]['dispersion']
+        self._extinction_rate = self._log[PARAMS_KEY]['extinction']
 
     def _setup(self):
         self._setup_index_map()
@@ -95,6 +101,9 @@ class JSONLog(LogFile):
             dist_vec[s['distribution']] = s['ratio']
 
         return dist_vec
+
+    def params_vector(self):
+        return numpy.array([self._dispersion_rate, self._extinction_rate])
 
     def __and__(self, other):
         return sorted(set(self._indexes) & set(other._indexes))
