@@ -124,7 +124,7 @@ class JSONLog(LogFile):
         return total_dist
 
     def normalizedWasserSteinMetric(self, other):
-        return self.wassersteinMetric(other) / (2 * self._taxa - 1)
+        return self.wassersteinMetric(other) / (self._taxa - 1)
 
 
 def DistributionVectorGenerator(json1, json2, regions):

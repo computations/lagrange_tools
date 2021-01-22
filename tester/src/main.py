@@ -17,7 +17,7 @@ if __name__ == "__main__":
     parser.add_argument('--archive', type=str, default=DEFAULT_ARCHIVE)
     parser.add_argument('--program', type=str, default=DEFAULT_PROGRAM)
     parser.add_argument('--fail-threshold', type=int, default=10)
-    parser.add_argument('--distance-threshold', type=float, default=1e-6)
+    parser.add_argument('--distance-threshold', type=float, default=1e-4)
     args = parser.parse_args()
 
     prefix_specified = True
