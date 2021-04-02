@@ -79,7 +79,7 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
                     explicit_start=True,
                     explicit_end=True))
 
-        with open(os.path.join(prefix, 'notes.md'), 'w') as notesfile:
+        with open(os.path.join(prefix, 'notes.md'), 'a') as notesfile:
             notesfile.write("- Started on: {}\n".format(
                 datetime.datetime.now().isoformat()))
 

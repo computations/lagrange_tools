@@ -40,6 +40,7 @@ if __name__ == "__main__":
     parser.add_argument("--iters", type=int, default=100)
     parser.add_argument("--procs", type=int)
     parser.add_argument("--program", type=str)
+    parser.add_argument("--notes", type=str)
     parser.add_argument("--profile", action='store_true', default=False)
     parser.add_argument("--resume", action='store_true', default=False)
     args = parser.parse_args()
@@ -94,4 +95,8 @@ if __name__ == "__main__":
     benchmark.run(args.prefix, args.regions, args.taxa, args.iters, args.procs,
                   args.program, args.profile, flamegraph_cmd)
     end_time = timer()
+    with open(os.path.join(args.prefix, "notes.md"), 'a') as notesfile:
+        notesfile.write("- notes:\n")
+        if args.notes:
+            notesfile.write("  - {}\n".format(args.notes))
     rich.print("Benchmarks took {:.3f} seconds".format(end_time - start_time))
