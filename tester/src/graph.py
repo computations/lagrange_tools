@@ -26,7 +26,7 @@ class problem:
 
     def make_matrix(self):
         matrix = []
-        for state in range(self._states-1):
+        for state in range(self._states - 1):
             row = []
             for e in self._edges:
                 if e._from == state:
@@ -45,4 +45,4 @@ class problem:
         return numpy.sum(ret.x)
 
     def normalized_dist(self):
-        return self.dist()/self._regions
+        return self.dist() / self._regions

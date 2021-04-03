@@ -72,6 +72,7 @@ class JSONLog(LogFile):
         super(JSONLog, self).__init__(logfile)
         self._log = json.loads(self._file_contents)
         self._setup()
+        self._file_contents = None
 
     def _setup_index_map(self):
         self._indexes = []

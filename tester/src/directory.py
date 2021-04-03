@@ -142,6 +142,9 @@ class ExperimentTrialDirectory(TrialDirectory):
     def failed(self):
         return self._failed
 
+    def setFailed(self):
+        self._failed = True
+
 
 class ExperimentWithDistance:
     def __init__(self, exp, dist):

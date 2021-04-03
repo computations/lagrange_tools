@@ -4,6 +4,7 @@ import tarfile
 import argparse
 import pathlib
 import util
+import random
 import lagrange
 import directory
 import rich
@@ -34,6 +35,8 @@ def run(prefix, archive, program, prefix_specified, copy_threshold,
         jobs = directory.extractTarFileAndMakeDirectories(
             archive, prefix, progress)
 
+        random.shuffle(jobs)
+
         work_task = progress.add_task("[red]Running...", total=len(jobs))
         for expected, experiment in jobs:
             try:
@@ -48,7 +51,12 @@ def run(prefix, archive, program, prefix_specified, copy_threshold,
             if experiment.failed():
                 continue
             parameter_diff = expected.parameterVectorDifference(experiment)
-            dist = expected.metricCompare(experiment)
+            try:
+                dist = expected.metricCompare(experiment)
+            except:
+                experiment.setFailed()
+                continue
+
             linreg_xs.append(parameter_diff)
             linreg_ys.append(dist)
             if dist > distance_threshold:
