@@ -25,8 +25,6 @@ if __name__ == "__main__":
     SOURCE_DIR = os.path.dirname(os.path.abspath(os.path.realpath(__file__)))
     DEFAULT_PROGRAM = os.path.abspath(
         os.path.join(SOURCE_DIR, "../../../bin/lagrange"))
-    DEFAULT_PROGRAM_PROFILE = os.path.abspath(
-        os.path.join(SOURCE_DIR, "../../../bin/lagrange-profile"))
 
     flamegraph_cmd = [
         "bash",
@@ -72,7 +70,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
     if args.profile and args.program is None:
-        args.program = DEFAULT_PROGRAM_PROFILE
+        args.program = DEFAULT_PROGRAM
     elif args.program is None:
         args.program = DEFAULT_PROGRAM
 

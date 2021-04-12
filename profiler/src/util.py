@@ -8,6 +8,7 @@ import base58
 CAP_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 BITCOIN_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
+
 class directory_guard:
     def __init__(self, path):
         self._path = path
@@ -41,23 +42,26 @@ def base49_generator(maximum):
     for index in range(maximum):
         bases = [
             CAP_ALPHABET[(index % (len(CAP_ALPHABET)**(e + 1))) //
-                             (len(CAP_ALPHABET)**e)] for e in range(iters)
+                         (len(CAP_ALPHABET)**e)] for e in range(iters)
         ]
         bases.reverse()
         yield ''.join(bases)
+
 
 def base58_generator(maximum):
     if maximum == 1:
         yield BITCOIN_ALPHABET[0]
-    iters = math.ceil(math.log(maximum, len(BITCOIN_ALPHABET)))
-    for index in range(maximum):
-        bases = [
-            BITCOIN_ALPHABET[(index % (len(BITCOIN_ALPHABET)**(e + 1))) //
-                             (len(BITCOIN_ALPHABET)**e)] for e in range(iters)
-        ]
-        bases.reverse()
-        yield ''.join(bases)
+    else:
+        iters = math.ceil(math.log(maximum, len(BITCOIN_ALPHABET)))
+        for index in range(maximum):
+            bases = [
+                BITCOIN_ALPHABET[(index % (len(BITCOIN_ALPHABET)**(e + 1))) //
+                                 (len(BITCOIN_ALPHABET)**e)]
+                for e in range(iters)
+            ]
+            bases.reverse()
+            yield ''.join(bases)
+
 
 def make_random_nonce():
     return base58.b58encode(os.urandom(8)).decode('utf-8')
-

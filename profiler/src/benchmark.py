@@ -91,6 +91,8 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
                                       exp_program))
             progress_bar.update(make_task, advance=1.0)
 
+        rich.print("Running {} experiments".format(len(exp)))
+
         overall_task = progress_bar.add_task("Running...",
                                              total=total_datasets + extra_work)
 
