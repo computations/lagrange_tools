@@ -25,9 +25,8 @@ class LagrangeLogFileType(enum.Enum):
 
 
 class LagrangeLog:
-    def __init__(self, elog, bglog, jlog=None):
+    def __init__(self, elog, jlog=None):
         self._execution_log = ExecutionLog(elog)
-        self._bgstates_log = BGStatesLog(bglog)
         if not jlog is None:
             self._json_log = JSONLog(jlog)
 

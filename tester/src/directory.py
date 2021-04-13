@@ -68,8 +68,6 @@ class TrialDirectory:
     def convertToExpectedDirectory(self):
         new_path = os.path.join(self._path, "expected")
         os.mkdir(new_path)
-        shutil.move(self._bgkey_filename, new_path)
-        shutil.move(self._bgstates_filename, new_path)
         if hasattr(self, '_json_filename'):
             shutil.move(self._json_filename, new_path)
         shutil.move(self._console_filename, new_path)
@@ -91,16 +89,11 @@ class TrialDirectory:
         return (expected_dir, experiment_dir)
 
     def _registerLog(self):
-        if not hasattr(self, '_bgstates_filename') or not hasattr(
-                self, '_console_filename'):
-            raise ExperimentFilesMissing
         if hasattr(self, '_json_filename'):
             self._lagrange_log = LagrangeLog(self._console_filename,
-                                             self._bgstates_filename,
                                              self._json_filename)
         else:
-            self._lagrange_log = LagrangeLog(self._console_filename,
-                                             self._bgstates_filename)
+            self._lagrange_log = LagrangeLog(self._console_filename)
 
     def binaryCompare(self, other):
         return self._lagrange_log == other._lagrange_log
