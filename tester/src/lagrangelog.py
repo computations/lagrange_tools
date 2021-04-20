@@ -29,6 +29,9 @@ class LagrangeLog:
         self._execution_log = ExecutionLog(elog)
         if not jlog is None:
             self._json_log = JSONLog(jlog)
+        else:
+            raise RuntimeError(
+                "No JSON log found when parsing {}".format(elog))
 
     def __eq__(self, other):
         return self._bgstates_log == other._bgstates_log
