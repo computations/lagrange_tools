@@ -20,12 +20,12 @@ import hashlib
 import datetime
 
 
-def make_datasets(taxa_count, length, ds_count, threads):
+def make_datasets(taxa_count, length, ds_count, workers):
     return [
         dataset.lagrange_dataset(prefix,
                                  taxa_count=taxa_count,
                                  length=length,
-                                 threads=threads)
+                                 workers=workers)
         for prefix in util.base58_generator(ds_count)
     ]
 
@@ -43,7 +43,7 @@ def load_parameters(prefix):
         return yaml.safe_load(yamlfile.read())
 
 
-def run(prefix, regions, taxa, iters, procs, program_path, profile, threads,
+def run(prefix, regions, taxa, iters, procs, program_path, profile, workers,
         flamegraph_cmd):
     os.makedirs(prefix, exist_ok=True)
 
@@ -78,7 +78,7 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile, threads,
                         'program_path': program_path,
                         'program_sha256': compute_hash_with_path(program_path),
                         'profile': profile,
-                        'threads': threads,
+                        'workers': workers,
                     },
                     explicit_start=True,
                     explicit_end=True))
@@ -92,7 +92,7 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile, threads,
                                     exp_name_format.format(regions=r, taxa=t))
             exp.append(
                 experiment.experiment(exp_path,
-                                      make_datasets(t, r, iters, threads),
+                                      make_datasets(t, r, iters, workers),
                                       exp_program))
             progress_bar.update(make_task, advance=1.0)
 

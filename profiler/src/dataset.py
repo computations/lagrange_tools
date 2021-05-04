@@ -68,7 +68,7 @@ datafile = {datafile}
 areanames = {areanames}
 ancstate = _all_
 states
-threads = {threads}
+workers = {workers}
 """
 
     def __init__(self, path, **kwargs):
@@ -105,13 +105,13 @@ threads = {threads}
                 "R" + str.upper(s) for s in util.base26_generator(self.length)
             ]
             self._existing = False
-            self._threads = kwargs['threads']
+            self._workers = kwargs['workers']
 
-    def make_lagrange_file(self, threads=1):
+    def make_lagrange_file(self, workers=1):
         return self._lagrange_config.format(treefile=self.tree_filename,
                                             datafile=self.alignment_filename,
                                             areanames=self.area_names_string,
-                                            threads=self._threads)
+                                            workers=self._workers)
 
     def write(self):
         if not self._existing:

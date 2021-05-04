@@ -38,7 +38,7 @@ if __name__ == "__main__":
     parser.add_argument("--iters", type=int, default=100)
     parser.add_argument("--procs", type=int)
     parser.add_argument("--program", type=str)
-    parser.add_argument("--threads", type=int, default=1)
+    parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--notes", type=str)
     parser.add_argument("--profile", action='store_true', default=False)
     parser.add_argument("--resume", action='store_true', default=False)
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
     start_time = timer()
     benchmark.run(args.prefix, args.regions, args.taxa, args.iters, args.procs,
-                  args.program, args.profile, args.threads, flamegraph_cmd)
+                  args.program, args.profile, args.workers, flamegraph_cmd)
     end_time = timer()
     with open(os.path.join(args.prefix, "notes.md"), 'a') as notesfile:
         notesfile.write("- notes:\n")
