@@ -68,6 +68,7 @@ datafile = {datafile}
 areanames = {areanames}
 ancstate = _all_
 states
+threads = {threads}
 """
 
     def __init__(self, path, **kwargs):
@@ -86,7 +87,8 @@ states
                     self._file_prefix = f.os.path.splitext(f)[0]
                     break
         else:
-            self._file_prefix = self._file_prefix + "_" + util.make_random_nonce()
+            self._file_prefix = self._file_prefix + "_" + util.make_random_nonce(
+            )
             self._tree = ete3.Tree()
             self._length = kwargs['length']
             self._tree.populate(
@@ -103,13 +105,13 @@ states
                 "R" + str.upper(s) for s in util.base26_generator(self.length)
             ]
             self._existing = False
+            self._threads = kwargs['threads']
 
-    def make_lagrange_file(self):
-        return self._lagrange_config.format(
-            treefile=self.tree_filename,
-            datafile=self.alignment_filename,
-            areanames=self.area_names_string,
-        )
+    def make_lagrange_file(self, threads=1):
+        return self._lagrange_config.format(treefile=self.tree_filename,
+                                            datafile=self.alignment_filename,
+                                            areanames=self.area_names_string,
+                                            threads=self._threads)
 
     def write(self):
         if not self._existing:
@@ -137,7 +139,9 @@ states
 
     @staticmethod
     def _make_ultrametric(tree):
-        heights = [lagrange_dataset._make_ultrametric(c) for c in tree.children]
+        heights = [
+            lagrange_dataset._make_ultrametric(c) for c in tree.children
+        ]
         if len(heights) == 0:
             return tree.dist
         max_height = max(heights)
