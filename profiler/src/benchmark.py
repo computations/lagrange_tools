@@ -20,12 +20,13 @@ import hashlib
 import datetime
 
 
-def make_datasets(taxa_count, length, ds_count, workers):
+def make_datasets(taxa_count, length, ds_count, workers, threads_per_worker):
     return [
         dataset.lagrange_dataset(prefix,
                                  taxa_count=taxa_count,
                                  length=length,
-                                 workers=workers)
+                                 workers=workers,
+                                 threads_per_worker=threads_per_worker)
         for prefix in util.base58_generator(ds_count)
     ]
 
@@ -43,8 +44,8 @@ def load_parameters(prefix):
         return yaml.safe_load(yamlfile.read())
 
 
-def run(prefix, regions, taxa, iters, procs, program_path, profile, workers,
-        flamegraph_cmd):
+def run(prefix, regions, taxa, iters, procs, program_path, profile,
+        threading_configurations, flamegraph_cmd):
     os.makedirs(prefix, exist_ok=True)
 
     exp_program = [
@@ -54,11 +55,12 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile, workers,
 
     exp = []
 
-    exp_name_format = "{taxa}taxa_{regions}regions"
+    exp_name_format = "{taxa}taxa_{regions}regions_{workers}workers_{tpw}tpw"
 
     with rich.progress.Progress() as progress_bar:
 
-        total_datasets = len(regions) * len(taxa)
+        total_datasets = len(regions) * len(taxa) *\
+                len(threading_configurations)
         total_work = total_datasets * iters
         extra_work = 0
         if profile:
@@ -78,7 +80,7 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile, workers,
                         'program_path': program_path,
                         'program_sha256': compute_hash_with_path(program_path),
                         'profile': profile,
-                        'workers': workers,
+                        'threading_configurations': threading_configurations,
                     },
                     explicit_start=True,
                     explicit_end=True))
@@ -87,12 +89,17 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile, workers,
             notesfile.write("- Started on: {}\n".format(
                 datetime.datetime.now().isoformat()))
 
-        for r, t in itertools.product(regions, taxa):
-            exp_path = os.path.join(prefix,
-                                    exp_name_format.format(regions=r, taxa=t))
+        for r, t, tc in itertools.product(regions, taxa,
+                                          threading_configurations):
+            exp_path = os.path.join(
+                prefix,
+                exp_name_format.format(regions=r,
+                                       taxa=t,
+                                       workers=tc[0],
+                                       tpw=tc[1]))
             exp.append(
                 experiment.experiment(exp_path,
-                                      make_datasets(t, r, iters, workers),
+                                      make_datasets(t, r, iters, tc[0], tc[1]),
                                       exp_program))
             progress_bar.update(make_task, advance=1.0)
 

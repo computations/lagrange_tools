@@ -91,8 +91,10 @@ class lagrange_result(result.result):
             'program': self.program,
             'taxa': self._dataset.taxa_count,
             'regions': self._dataset.region_count,
+            'workers': self._dataset.workers,
+            'tpw': self._dataset.threads_per_worker,
             'time': self._time
         }
 
     def header(self):
-        return ['program', 'taxa', 'regions', 'time']
+        return ['program', 'taxa', 'regions', 'workers', 'tpw', 'time']

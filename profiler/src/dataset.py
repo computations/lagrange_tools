@@ -69,6 +69,7 @@ areanames = {areanames}
 ancstate = _all_
 states
 workers = {workers}
+threads-per-worker = {threads_per_worker}
 """
 
     def __init__(self, path, **kwargs):
@@ -106,12 +107,15 @@ workers = {workers}
             ]
             self._existing = False
             self._workers = kwargs['workers']
+            self._threads_per_worker = kwargs['threads_per_worker']
 
     def make_lagrange_file(self, workers=1):
-        return self._lagrange_config.format(treefile=self.tree_filename,
-                                            datafile=self.alignment_filename,
-                                            areanames=self.area_names_string,
-                                            workers=self._workers)
+        return self._lagrange_config.format(
+            treefile=self.tree_filename,
+            datafile=self.alignment_filename,
+            areanames=self.area_names_string,
+            workers=self._workers,
+            threads_per_worker=self._threads_per_worker)
 
     def write(self):
         if not self._existing:
@@ -173,6 +177,14 @@ workers = {workers}
     @property
     def taxa_count(self):
         return len(self.taxa_set)
+
+    @property
+    def workers(self):
+        return self._workers
+
+    @property
+    def threads_per_worker(self):
+        return self._threads_per_worker
 
     @property
     def taxa_set(self):

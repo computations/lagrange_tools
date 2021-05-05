@@ -8,6 +8,7 @@ import datetime
 import util
 import rich
 import sys
+import functools
 from timeit import default_timer as timer
 
 
@@ -18,6 +19,11 @@ def git_describe(repo):
             description = t.name
             break
     return description
+
+
+# Code taken from https://stackoverflow.com/questions/6800193/
+def factors(n):
+    return set((i, n // i) for i in range(1, n + 1) if n % i == 0)
 
 
 if __name__ == "__main__":
@@ -38,7 +44,12 @@ if __name__ == "__main__":
     parser.add_argument("--iters", type=int, default=100)
     parser.add_argument("--procs", type=int)
     parser.add_argument("--program", type=str)
-    parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument("--workers", type=int, nargs="+", default=None)
+    parser.add_argument("--threads-per-worker",
+                        type=int,
+                        nargs="+",
+                        default=None)
+    parser.add_argument("--total-threads", type=int, default=1)
     parser.add_argument("--notes", type=str)
     parser.add_argument("--profile", action='store_true', default=False)
     parser.add_argument("--resume", action='store_true', default=False)
@@ -75,6 +86,18 @@ if __name__ == "__main__":
     elif args.program is None:
         args.program = DEFAULT_PROGRAM
 
+    threading_configurations = []
+    if args.threads_per_worker is None and args.workers is None:
+        threading_configurations = factors(args.total_threads)
+    else:
+        if args.threads_per_worker is None or args.workers is None:
+            rich.print(
+                "[red bold]Please specify both workers and threads per" +
+                " worker if one is specified[/red bold]")
+            sys.exit(1)
+        threading_configurations =\
+                list(itertools.product(args.workers, args.threads_per_worker))
+
     if args.prefix is None:
         repo = git.Repo(os.path.abspath(os.path.join(SOURCE_DIR, '../../../')))
         commit_string = datetime.datetime.now().strftime('%Y-%m-%d') + "_"\
@@ -92,7 +115,8 @@ if __name__ == "__main__":
 
     start_time = timer()
     benchmark.run(args.prefix, args.regions, args.taxa, args.iters, args.procs,
-                  args.program, args.profile, args.workers, flamegraph_cmd)
+                  args.program, args.profile, threading_configurations,
+                  flamegraph_cmd)
     end_time = timer()
     with open(os.path.join(args.prefix, "notes.md"), 'a') as notesfile:
         notesfile.write("- notes:\n")
