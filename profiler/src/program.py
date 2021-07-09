@@ -84,7 +84,7 @@ class lagrange_result(result.result):
             print(line)
             raise RuntimeError("The time line of the log file was malformed")
         prefix_length = len("Analysis took: ")
-        return float(line[prefix_length:-2])
+        return float(line[prefix_length:-1])
 
     def write_row(self):
         return {
