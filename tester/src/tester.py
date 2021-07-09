@@ -49,12 +49,16 @@ def run(prefix, archive, program, prefix_specified, copy_threshold,
 
         for expected, experiment in jobs:
             if experiment.failed():
+                rich.print("Exp {} failed".format(experiment))
+                progress.update(check_task, advance=1.0)
                 continue
             parameter_diff = expected.parameterVectorDifference(experiment)
             try:
                 dist = expected.metricCompare(experiment)
             except:
+                rich.print("Exp {} failed".format(experiment))
                 experiment.setFailed()
+                progress.update(check_task, advance=1.0)
                 continue
 
             linreg_xs.append(parameter_diff)
@@ -65,10 +69,15 @@ def run(prefix, archive, program, prefix_specified, copy_threshold,
             progress.update(check_task, advance=1.0)
 
     if len(linreg_xs) > 0:
-        linreg_result = LinearRegression().fit(linreg_xs, linreg_ys)
-        linreg_rsquared = linreg_result.score(linreg_xs, linreg_ys)
-        console.print("Parameter error regression coefficient: {}".format(
-            linreg_rsquared))
+        try:
+            linreg_result = LinearRegression().fit(linreg_xs, linreg_ys)
+            linreg_rsquared = linreg_result.score(linreg_xs, linreg_ys)
+            console.print("Parameter error regression coefficient: {}".format(
+                linreg_rsquared))
+        except:
+            rich.print("Failed to peform linear regression")
+            rich.print(linreg_xs)
+            rich.print(linreg_ys)
 
     with open(os.path.join(prefix, "failed_paths.yaml"), "w") as outfile:
         yaml.add_representer(directory.ExpectedTrialDirectory,
