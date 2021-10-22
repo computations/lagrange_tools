@@ -103,10 +103,14 @@ if __name__ == "__main__":
                 list(itertools.product(args.workers, args.threads_per_worker))
 
     if args.prefix is None:
-        GIT_DIR = os.path.abspath(os.path.join(SOURCE_DIR, '../../../')) if not\
-                args.program is None else\
+        GIT_DIR = None 
+        if args.program is None:
+            GIT_DIR = os.path.abspath(os.path.join(SOURCE_DIR, '../../../'))
+        else:
+            GIT_DIR =\
                 os.path.abspath(os.path.join(os.path.dirname(args.program),
-                    '/../'))
+                    '..'))
+        print(GIT_DIR)
         repo = git.Repo(GIT_DIR)
         commit_string = datetime.datetime.now().strftime('%Y-%m-%d') + "_"\
                 + git_describe(repo) + "_"\
