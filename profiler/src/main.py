@@ -107,7 +107,7 @@ if __name__ == "__main__":
                 args.program is None else\
                 os.path.abspath(os.path.join(os.path.dirname(args.program),
                     '/../'))
-        repo = git.Repo(os.path.abspath(os.path.join(SOURCE_DIR, '../../../')))
+        repo = git.Repo(GIT_DIR)
         commit_string = datetime.datetime.now().strftime('%Y-%m-%d') + "_"\
                 + git_describe(repo) + "_"\
                 + util.make_random_nonce()
