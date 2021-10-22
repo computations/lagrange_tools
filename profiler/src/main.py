@@ -53,6 +53,7 @@ if __name__ == "__main__":
     parser.add_argument("--notes", type=str)
     parser.add_argument("--profile", action='store_true', default=False)
     parser.add_argument("--resume", action='store_true', default=False)
+    parser.add_argument("--recompute", action='store_true', default=False)
     args = parser.parse_args()
 
     if args.resume:
@@ -71,9 +72,11 @@ if __name__ == "__main__":
         if not parameters['program_sha256'] ==\
                 benchmark.compute_hash_with_path(parameters['program_path']):
             rich.print(
-                "[red bold]Error, the progrma hash does not match the program"
+                "[red bold]Error, the progrma hash does not match the program "
                 + "that started this run[/red bold]")
             sys.exit(1)
+    if args.recompute:
+        parameters = benchmark.load_parameters(args.prefix)
     else:
         if not args.prefix is None and os.path.exists(args.prefix):
             rich.print("[red bold]Refusing to resume an existing prefix " +
@@ -99,6 +102,10 @@ if __name__ == "__main__":
                 list(itertools.product(args.workers, args.threads_per_worker))
 
     if args.prefix is None:
+        GIT_DIR = os.path.abspath(os.path.join(SOURCE_DIR, '../../../')) if not\
+                args.program is None else\
+                os.path.abspath(os.path.join(os.path.dirname(args.program),
+                    '/../'))
         repo = git.Repo(os.path.abspath(os.path.join(SOURCE_DIR, '../../../')))
         commit_string = datetime.datetime.now().strftime('%Y-%m-%d') + "_"\
                 + git_describe(repo) + "_"\
