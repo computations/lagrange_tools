@@ -1,6 +1,7 @@
 #!/bin/env/python3
 
 import argparse
+import itertools
 import benchmark
 import git
 import os
