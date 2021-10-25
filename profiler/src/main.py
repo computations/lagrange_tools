@@ -50,7 +50,7 @@ if __name__ == "__main__":
                         type=int,
                         nargs="+",
                         default=None)
-    parser.add_argument("--total-threads", type=int, default=1)
+    parser.add_argument("--total-threads", nargs='+', type=int, default=[1])
     parser.add_argument("--notes", type=str)
     parser.add_argument("--profile", action='store_true', default=False)
     parser.add_argument("--resume", action='store_true', default=False)
@@ -92,7 +92,8 @@ if __name__ == "__main__":
 
     threading_configurations = []
     if args.threads_per_worker is None and args.workers is None:
-        threading_configurations = factors(args.total_threads)
+        for tt in args.total_threads:
+            threading_configurations.extend(factors(tt))
     else:
         if args.threads_per_worker is None or args.workers is None:
             rich.print(
