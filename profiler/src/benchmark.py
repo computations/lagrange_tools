@@ -41,7 +41,7 @@ def compute_hash_with_path(path):
 def load_parameters(prefix):
     paramters_filename = os.path.join(prefix, 'parameters.yaml')
     with open(paramters_filename) as yamlfile:
-        return yaml.safe_load(yamlfile.read())
+        return yaml.load(yamlfile.read())
 
 
 def run(prefix, regions, taxa, iters, procs, program_path, profile,
