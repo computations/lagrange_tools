@@ -20,9 +20,11 @@ import hashlib
 import datetime
 
 
-def make_datasets(taxa_count, length, ds_count, workers, threads_per_worker):
+def make_datasets(taxa_count, length, ds_count, workers, threads_per_worker,
+                  root):
     return [
         dataset.lagrange_dataset(prefix,
+                                 root,
                                  taxa_count=taxa_count,
                                  length=length,
                                  workers=workers,
@@ -97,10 +99,12 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
                                        taxa=t,
                                        workers=tc[0],
                                        tpw=tc[1]))
+            full_path = os.path.join(os.getcwd(), exp_path)
             exp.append(
-                experiment.experiment(exp_path,
-                                      make_datasets(t, r, iters, tc[0], tc[1]),
-                                      exp_program))
+                experiment.experiment(
+                    exp_path,
+                    make_datasets(t, r, iters, tc[0], tc[1], full_path),
+                    exp_program))
             progress_bar.update(make_task, advance=1.0)
 
         rich.print("Running {} experiments".format(len(exp)))

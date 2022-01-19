@@ -10,8 +10,9 @@ import base58
 class dataset:
     _file_prefix = "generic_prog"
 
-    def __init__(self, path, **kwargs):
+    def __init__(self, path, root, **kwargs):
         self._path = path
+        self._root = root
 
     def add_prefix_dir(self, prefix):
         self._path = os.path.join(prefix, self._path)
@@ -22,6 +23,10 @@ class dataset:
     @property
     def path(self):
         return self._path
+
+    @property
+    def full_path(self):
+        return os.path.join(self._root, self._path)
 
     def write(self):
         raise NotImplementedError("Please implement the write function")
@@ -72,15 +77,15 @@ workers = {workers}
 threads-per-worker = {threads_per_worker}
 """
 
-    def __init__(self, path, **kwargs):
+    def __init__(self, path, root, **kwargs):
         """Create a lagrange dataset
 
         Keyword arguments:
         length      -- Number of regions to generate
         taxa_count  -- Number of taxa to generate
         """
-        super().__init__(path, **kwargs)
-        if os.path.exists(self.path):
+        super().__init__(path, root, **kwargs)
+        if os.path.exists(self.full_path):
             self._existing = True
             files = os.listdir(self.path)
             for f in files:
