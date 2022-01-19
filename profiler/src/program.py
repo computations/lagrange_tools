@@ -61,7 +61,6 @@ class lagrange(program):
                 cmd = []
                 cmd.extend(self.profile_cmd)
                 cmd.extend([self.binary, dataset.lagrange_config_path])
-                print("running lagrange with:", cmd)
                 subprocess.run(cmd, stdout=logfile, stderr=logfile)
                 #self.set_done(dataset.path)
                 self.set_done('')
