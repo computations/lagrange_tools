@@ -8,6 +8,7 @@ import datetime
 
 
 class program:
+
     def __init__(self, **kwargs):
         self._binary_path = kwargs['binary_path']
         self._profile = kwargs['profile']
@@ -35,10 +36,20 @@ class program:
             donefile.write("\n")
 
     def check_done(self, path):
-        return os.path.exists(program._donefile(path))
+        if not os.path.exists(program._donefile(path)):
+            return False
+        if not os.path.exists(os.path.join(path, 'lagrange.log')):
+            return False
+        with open(os.path.join(path, 'lagrange.log')) as logfile:
+            for line in logfile:
+                if 'runtime_error' in line:
+                    print("found bad logfile for path", path)
+                    return False
+        return True
 
 
 class lagrange(program):
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -50,8 +61,10 @@ class lagrange(program):
                 cmd = []
                 cmd.extend(self.profile_cmd)
                 cmd.extend([self.binary, dataset.lagrange_config_path])
+                print("running lagrange with:", cmd)
                 subprocess.run(cmd, stdout=logfile, stderr=logfile)
-                self.set_done(dataset.path)
+                #self.set_done(dataset.path)
+                self.set_done('')
 
     def get_result(self, dataset):
         return lagrange_result(dataset)

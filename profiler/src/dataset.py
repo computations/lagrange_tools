@@ -87,16 +87,20 @@ threads-per-worker = {threads_per_worker}
         super().__init__(path, root, **kwargs)
         if os.path.exists(self.full_path):
             self._existing = True
-            files = os.listdir(self.path)
+            files = os.listdir(self.full_path)
             for f in files:
                 if os.path.splitext(f)[1] == ".conf":
-                    self._file_prefix = f.os.path.splitext(f)[0]
+                    self._file_prefix = os.path.splitext(f)[0]
                     break
+            self._path = os.path.join(self._root, self._path)
+            self._lock_paths()
+            self._tree = ete3.Tree(
+                open(os.path.join(self.full_path, self.tree_path)).read())
+
         else:
             self._file_prefix = self._file_prefix + "_" + util.make_random_nonce(
             )
             self._tree = ete3.Tree()
-            self._length = kwargs['length']
             self._tree.populate(
                 kwargs['taxa_count'],
                 names_library=[
@@ -111,8 +115,10 @@ threads-per-worker = {threads_per_worker}
                 "R" + str.upper(s) for s in util.base26_generator(self.length)
             ]
             self._existing = False
-            self._workers = kwargs['workers']
-            self._threads_per_worker = kwargs['threads_per_worker']
+
+        self._workers = kwargs['workers']
+        self._threads_per_worker = kwargs['threads_per_worker']
+        self._length = kwargs['length']
 
     def make_lagrange_file(self, workers=1):
         return self._lagrange_config.format(
