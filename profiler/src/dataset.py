@@ -85,6 +85,11 @@ threads-per-worker = {threads_per_worker}
         taxa_count  -- Number of taxa to generate
         """
         super().__init__(path, root, **kwargs)
+
+        self._workers = kwargs['workers']
+        self._threads_per_worker = kwargs['threads_per_worker']
+        self._length = kwargs['length']
+
         if os.path.exists(self.full_path):
             self._existing = True
             files = os.listdir(self.full_path)
@@ -96,7 +101,6 @@ threads-per-worker = {threads_per_worker}
             self._lock_paths()
             self._tree = ete3.Tree(
                 open(os.path.join(self.full_path, self.tree_path)).read())
-
         else:
             self._file_prefix = self._file_prefix + "_" + util.make_random_nonce(
             )
@@ -115,10 +119,6 @@ threads-per-worker = {threads_per_worker}
                 "R" + str.upper(s) for s in util.base26_generator(self.length)
             ]
             self._existing = False
-
-        self._workers = kwargs['workers']
-        self._threads_per_worker = kwargs['threads_per_worker']
-        self._length = kwargs['length']
 
     def make_lagrange_file(self, workers=1):
         return self._lagrange_config.format(
