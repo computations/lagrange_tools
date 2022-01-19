@@ -76,7 +76,7 @@ if __name__ == "__main__":
                 "[red bold]Error, the progrma hash does not match the program "
                 + "that started this run[/red bold]")
             sys.exit(1)
-    if args.recompute:
+    elif args.recompute:
         parameters = benchmark.load_parameters(args.prefix)
     else:
         if not args.prefix is None and os.path.exists(args.prefix):
@@ -104,7 +104,7 @@ if __name__ == "__main__":
                 list(itertools.product(args.workers, args.threads_per_worker))
 
     if args.prefix is None:
-        GIT_DIR = None 
+        GIT_DIR = None
         if args.program is None:
             GIT_DIR = os.path.abspath(os.path.join(SOURCE_DIR, '../../../'))
         else:
