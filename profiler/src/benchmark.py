@@ -110,7 +110,9 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
         rich.print("Running {} experiments".format(len(exp)))
 
         overall_work = total_datasets + extra_work if procs != 1 else total_work
-        overall_task = progress_bar.add_task("Running...", total=overall_work)
+        overall_task = progress_bar.add_task("Running...",
+                                             start=False,
+                                             total=overall_work)
 
         for e in exp:
             e.run(procs, progress_bar)
