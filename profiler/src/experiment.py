@@ -27,6 +27,7 @@ import rich.progress
 
 
 class experiment:
+
     def __init__(self, root_path, datasets, programs):
         self._root_path = root_path
         self._datasets = datasets
@@ -47,12 +48,20 @@ class experiment:
         ds.write()
         prog.run(ds)
 
-    def run(self, procs=None):
+    def run(self, procs=None, progress_bar=None):
         jobs = [(ds, prog) for ds in self._datasets for prog in self._programs]
         if procs is None:
             procs = 1
-        with multiprocessing.pool.Pool(procs) as pool:
-            pool.starmap(experiment._internal_run, jobs)
+        if procs == 1:
+            cur_task = progress_bar.add_task("Current Experiment",
+                                             total=len(jobs))
+            for ds, prog in jobs:
+                progress_bar.update(cur_task, advance=1.0)
+                self._internal_run(ds, prog)
+            progress_bar.update(cur_task, visible=False)
+        else:
+            with multiprocessing.pool.Pool(procs) as pool:
+                pool.starmap(experiment._internal_run, jobs)
 
     def collect_results(self):
         return [
