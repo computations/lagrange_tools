@@ -20,14 +20,15 @@ import hashlib
 import datetime
 
 
-def make_datasets(taxa_count, length, ds_count, workers, threads_per_worker,
-                  root):
+def make_datasets(taxa_count, length, ds_count, workers, approximate,
+                  threads_per_worker, root):
     return [
         dataset.lagrange_dataset(prefix,
                                  root,
                                  taxa_count=taxa_count,
                                  length=length,
                                  workers=workers,
+                                 approximate=approximate,
                                  threads_per_worker=threads_per_worker)
         for prefix in util.base58_generator(ds_count)
     ]
@@ -47,7 +48,7 @@ def load_parameters(prefix):
 
 
 def run(prefix, regions, taxa, iters, procs, program_path, profile,
-        threading_configurations, flamegraph_cmd):
+        approximate, threading_configurations, flamegraph_cmd):
     os.makedirs(prefix, exist_ok=True)
 
     exp_program = [
@@ -82,6 +83,7 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
                         'program_path': program_path,
                         'program_sha256': compute_hash_with_path(program_path),
                         'profile': profile,
+                        'approximate': approximate,
                         'threading_configurations': threading_configurations,
                     },
                     explicit_start=True,
@@ -103,8 +105,8 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
             exp.append(
                 experiment.experiment(
                     exp_path,
-                    make_datasets(t, r, iters, tc[0], tc[1], full_path),
-                    exp_program))
+                    make_datasets(t, r, iters, tc[0], approximate, tc[1],
+                                  full_path), exp_program))
             progress_bar.update(make_task, advance=1.0)
 
         rich.print("Running {} experiments".format(len(exp)))

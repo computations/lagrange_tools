@@ -75,6 +75,7 @@ ancstate = _all_
 states
 workers = {workers}
 threads-per-worker = {threads_per_worker}
+{approximate}
 """
 
     def __init__(self, path, root, **kwargs):
@@ -89,6 +90,10 @@ threads-per-worker = {threads_per_worker}
         self._workers = kwargs['workers']
         self._threads_per_worker = kwargs['threads_per_worker']
         self._length = kwargs['length']
+        if 'approximate' in kwargs:
+            self._approximate = kwargs['approximate']
+        else:
+            self._approximate = False
 
         if os.path.exists(self.full_path):
             self._existing = True
@@ -126,7 +131,8 @@ threads-per-worker = {threads_per_worker}
             datafile=self.alignment_filename,
             areanames=self.area_names_string,
             workers=self._workers,
-            threads_per_worker=self._threads_per_worker)
+            threads_per_worker=self._threads_per_worker,
+            approximate='approximate' if self._approximate else '')
 
     def write(self):
         if not self._existing:

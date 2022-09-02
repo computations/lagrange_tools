@@ -53,6 +53,7 @@ if __name__ == "__main__":
     parser.add_argument("--total-threads", nargs='+', type=int, default=[1])
     parser.add_argument("--notes", type=str)
     parser.add_argument("--profile", action='store_true', default=False)
+    parser.add_argument("--approximate", action='store_true', default=False)
     parser.add_argument("--resume", action='store_true', default=False)
     parser.add_argument("--recompute", action='store_true', default=False)
     args = parser.parse_args()
@@ -128,8 +129,8 @@ if __name__ == "__main__":
 
     start_time = timer()
     benchmark.run(args.prefix, args.regions, args.taxa, args.iters, args.procs,
-                  args.program, args.profile, threading_configurations,
-                  flamegraph_cmd)
+                  args.program, args.profile, args.approximate,
+                  threading_configurations, flamegraph_cmd)
     end_time = timer()
     with open(os.path.join(args.prefix, "notes.md"), 'a') as notesfile:
         notesfile.write("- notes:\n")

@@ -109,4 +109,4 @@ class lagrange_result(result.result):
         }
 
     def header(self):
-        return ['program', 'taxa', 'regions', 'workers', 'tpw', 'time']
+        return ['program', 'taxa', 'regions', 'workers', 'tpw', 'approximate', 'time']
