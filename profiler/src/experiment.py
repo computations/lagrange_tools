@@ -8,6 +8,7 @@ import multiprocessing
 import multiprocessing.pool
 import itertools
 import rich.progress
+from rich import print
 
 # The plan is to have a root level class call experiment that handels the
 # deployment and running of the process. There are a few questions:
@@ -44,11 +45,16 @@ class experiment:
         return self._datasets
 
     @staticmethod
-    def _internal_run(ds, prog):
+    def _internal_run(ds, prog, redo_enabled=False):
         ds.write()
-        prog.run(ds)
+        ret = prog.run(ds)
+        if not ret and redo_enabled:
+            print("[red]Redoing this run")
+            ds.remove()
+            ds._generate()
+            experiment._internal_run(ds, prog, redo_enabled)
 
-    def run(self, procs=None, progress_bar=None):
+    def run(self, procs=None, progress_bar=None, redo_enabled=False):
         jobs = [(ds, prog) for ds in self._datasets for prog in self._programs]
         if procs is None:
             procs = 1
@@ -57,7 +63,7 @@ class experiment:
                                              total=len(jobs))
             for ds, prog in jobs:
                 progress_bar.update(cur_task, advance=1.0)
-                self._internal_run(ds, prog)
+                self._internal_run(ds, prog, redo_enabled)
             progress_bar.update(cur_task, visible=False)
         else:
             with multiprocessing.pool.Pool(procs) as pool:

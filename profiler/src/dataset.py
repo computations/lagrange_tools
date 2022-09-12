@@ -5,6 +5,7 @@ import numpy
 import ete3
 import util
 import base58
+import shutil
 
 
 class dataset:
@@ -90,6 +91,7 @@ threads-per-worker = {threads_per_worker}
         self._workers = kwargs['workers']
         self._threads_per_worker = kwargs['threads_per_worker']
         self._length = kwargs['length']
+        self._taxa_count = kwargs['taxa_count']
         if 'approximate' in kwargs:
             self._approximate = kwargs['approximate']
         else:
@@ -106,24 +108,29 @@ threads-per-worker = {threads_per_worker}
             self._lock_paths()
             self._tree = ete3.Tree(
                 open(os.path.join(self.full_path, self.tree_path)).read())
+            return
         else:
             self._file_prefix = self._file_prefix + "_" + util.make_random_nonce(
             )
-            self._tree = ete3.Tree()
-            self._tree.populate(
-                kwargs['taxa_count'],
-                names_library=[
-                    s for s in util.base26_generator(kwargs['taxa_count'])
-                ])
-            for c in self._tree.traverse():
-                c.dist = numpy.random.gamma(0.5)
-            self._make_ultrametric(self._tree)
-            self._alignment = lagrange_dataset.generate_alignment(
-                self.taxa_set, kwargs['length'])
-            self._area_names = [
-                "R" + str.upper(s) for s in util.base26_generator(self.length)
-            ]
+            self._generate()
             self._existing = False
+
+    def _generate(self):
+        self._tree = ete3.Tree()
+        self._tree.populate(
+            self._taxa_count,
+            names_library=[s for s in util.base26_generator(self._taxa_count)])
+        for c in self._tree.traverse():
+            c.dist = numpy.random.gamma(0.5)
+        self._make_ultrametric(self._tree)
+        self._alignment = lagrange_dataset.generate_alignment(
+            self.taxa_set, self._length)
+        self._area_names = [
+            "R" + str.upper(s) for s in util.base26_generator(self.length)
+        ]
+
+    def remove(self):
+        shutil.rmtree(self.full_path)
 
     def make_lagrange_file(self, workers=1):
         return self._lagrange_config.format(

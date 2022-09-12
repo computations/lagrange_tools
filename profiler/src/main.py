@@ -56,6 +56,7 @@ if __name__ == "__main__":
     parser.add_argument("--approximate", action='store_true', default=False)
     parser.add_argument("--resume", action='store_true', default=False)
     parser.add_argument("--recompute", action='store_true', default=False)
+    parser.add_argument("--no-really", action='store_true', default=False)
     args = parser.parse_args()
 
     if args.resume:
@@ -129,7 +130,7 @@ if __name__ == "__main__":
 
     start_time = timer()
     benchmark.run(args.prefix, args.regions, args.taxa, args.iters, args.procs,
-                  args.program, args.profile, args.approximate,
+                  args.program, args.profile, args.approximate, args.no_really,
                   threading_configurations, flamegraph_cmd)
     end_time = timer()
     with open(os.path.join(args.prefix, "notes.md"), 'a') as notesfile:

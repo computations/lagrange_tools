@@ -48,7 +48,7 @@ def load_parameters(prefix):
 
 
 def run(prefix, regions, taxa, iters, procs, program_path, profile,
-        approximate, threading_configurations, flamegraph_cmd):
+        approximate, enable_redo, threading_configurations, flamegraph_cmd):
     os.makedirs(prefix, exist_ok=True)
 
     exp_program = [
@@ -117,7 +117,7 @@ def run(prefix, regions, taxa, iters, procs, program_path, profile,
                                              total=overall_work)
 
         for e in exp:
-            e.run(procs, progress_bar)
+            e.run(procs, progress_bar, enable_redo)
             progress_bar.update(overall_task, advance=1.0)
 
         if not profile:

@@ -61,9 +61,10 @@ class lagrange(program):
                 cmd = []
                 cmd.extend(self.profile_cmd)
                 cmd.extend([self.binary, dataset.lagrange_config_path])
-                subprocess.run(cmd, stdout=logfile, stderr=logfile)
+                ret = subprocess.run(cmd, stdout=logfile, stderr=logfile)
                 #self.set_done(dataset.path)
                 self.set_done('')
+                return ret.returncode == 0
 
     def get_result(self, dataset):
         return lagrange_result(dataset)
@@ -109,4 +110,7 @@ class lagrange_result(result.result):
         }
 
     def header(self):
-        return ['program', 'taxa', 'regions', 'workers', 'tpw', 'approximate', 'time']
+        return [
+            'program', 'taxa', 'regions', 'workers', 'tpw', 'approximate',
+            'time'
+        ]
