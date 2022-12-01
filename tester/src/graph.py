@@ -1,6 +1,5 @@
 import numpy
 import scipy.optimize
-from numpy.random import default_rng
 
 
 def popcount(x):
@@ -21,7 +20,7 @@ class problem:
         self._b_eq = dist_diff[:-1]
         for i in range(self._states):
             for j in range(self._states):
-                if popcount(i ^ j) == 1:
+                if popcount(i ^ j) == 1 and i != 0:
                     self._edges.append(edge(i, j))
 
     def make_matrix(self):
@@ -42,6 +41,7 @@ class problem:
         A_eq = self.make_matrix()
         c = numpy.ones(len(self._edges))
         ret = scipy.optimize.linprog(c, A_eq=A_eq, b_eq=self._b_eq)
+
         return numpy.sum(ret.x)
 
     def normalized_dist(self):
